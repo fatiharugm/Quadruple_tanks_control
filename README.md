@@ -136,18 +136,29 @@ Edit `controller.py` and implement a `PumpController` class that:
 - **Output:** Pump flow command in range [0, 300] cm³/s
 - **Constraints:** Single pump, independent control
 
-**Controller Options:**
+**Allowed Controller Types:**
+
+⚠️ **You MUST use ONLY one of the following:**
+
 1. **PID Controller** (Recommended)
    ```
    u(t) = Kp * e(t) + Ki * ∫e(τ)dτ + Kd * de/dt
    ```
    Tune gains (Kp, Ki, Kd) to achieve fast settling with minimal overshoot
 
-2. **Lead-Lag Compensator** (Advanced)
+2. **Lead-Lag Compensator**
+   ```
+   G_c(s) = K * (τ_d * s + 1) / (α * τ_d * s + 1)  where α > 1 for lead, α < 1 for lag
+   ```
    Design frequency-domain compensator, then implement as digital filter
 
-3. **Adaptive Control** (Challenge)
-   Adapt gains based on operating point or system conditions
+3. **PID + Lead-Lag Combination**
+   Cascade a lead-lag compensator with a PID controller for advanced shaping
+
+**NOT ALLOWED:**
+- ❌ Fuzzy logic, neural networks, or machine learning
+- ❌ Gain scheduling (multiple gains for different regions)
+- ❌ Advanced nonlinear control (sliding mode, etc.)
 
 ### Task 3: Tune Your Gains
 
@@ -169,6 +180,34 @@ Edit `controller.py` and implement a `PumpController` class that:
 - Add derivative gain (Kd) to reduce overshoot
 - Use anti-windup to prevent integral saturation at pump limits
 
+### Task 3b: Prepare Design Documentation (2-Page A4 Report)
+
+**REQUIRED - Submit with your code:**
+
+Prepare a concise 2-page A4 report (single-sided, 11pt font) documenting:
+
+**Page 1: Design Strategy**
+- System identification (linearization point, transfer functions)
+- Control design methodology:
+  - **Either:** Root-locus analysis (pole/zero placement, damping ratio, settling time)
+  - **Or:** Frequency-domain analysis (Bode plots, gain/phase margins, bandwidth requirements)
+  - **Or:** Both methods (if using PID + Lead-Lag)
+- Justification of chosen pole locations or frequency-domain specifications
+- Final controller parameters (Kp, Ki, Kd or compensator poles/zeros)
+
+**Page 2: Validation Results**
+- Simulation results plots (tank level trajectories with setpoints)
+- Settling time analysis per tank
+- Discussion of design trade-offs (settling time vs. overshoot vs. energy)
+- Comparison with initial design estimates
+- Challenges encountered and solutions
+
+**Format Requirements:**
+- PDF or DOC/DOCX only
+- Include system model and transfer functions (if linearized)
+- Include at least one Bode plot, root-locus plot, or frequency response analysis
+- Clear figures with labels and legends
+
 ### Task 4: Validate on the Nonlinear Plant
 
 **What to do:**
@@ -189,7 +228,28 @@ Edit `controller.py` and implement a `PumpController` class that:
    - Were there any oscillations or overshoot?
    - Did the pump commands exceed [0, 300] cm³/s?
 
-### Task 5: Test with Different Setpoints
+### Task 5: Prepare for Live Demonstration (5-Minute Pitch)
+
+**During Evaluation:**
+- You will have **5 minutes** to:
+  1. Briefly explain your control design strategy (1-2 min)
+  2. Run the simulation with your controller (1-2 min)
+  3. Answer questions about your design and tuning decisions (1-2 min)
+
+**Real-time Scoring:**
+- Your score will be calculated LIVE during the demonstration
+- Based on the 300-second simulation run
+- All 4 tanks must settle within their tolerance bands (±5% of setpoint for 30 seconds)
+
+**Evaluation Criteria:**
+- ✓ Correct controller type used (PID, Lead-Lag, or combination only)
+- ✓ Valid design methodology (root-locus or frequency domain documented)
+- ✓ Design report submitted (2 pages A4)
+- ✓ Code works without errors
+- ✓ Controller performance (final score and settling times)
+- ✓ Pitch clarity and understanding of design choices
+
+### Task 6: Test with Different Setpoints
 
 **What to do:**
 Edit `run_simulation.py` and change the setpoint values:
@@ -336,18 +396,34 @@ setpoint4 = 80.0  # Tank 4 target
   matplotlib.use('TkAgg')  # or 'Qt5Agg'
   ```
 
-## Quick Start Checklist
+## Submission Checklist
+
+**BEFORE Final Demonstration:**
 
 - [ ] Install dependencies: `pip install -r requirements.txt`
 - [ ] Run default simulation: `python run_simulation.py`
 - [ ] Read system documentation: `quadruple_tank_modeling.pdf`
 - [ ] Study the plant model: `quadruple_tanks/models/quadruple_system.py`
-- [ ] Implement your controller: `controller.py`
-- [ ] Tune PID gains (Kp, Ki, Kd, bias)
+- [ ] Design your controller using **ONLY** PID, Lead-Lag, or combination
+- [ ] Implement design in: `controller.py`
+- [ ] Linearize system and create transfer functions
+- [ ] Perform root-locus **OR** frequency-domain analysis (Bode/Nyquist)
+- [ ] Document design strategy in 2-page A4 report (PDF/DOC)
+- [ ] Include analysis plots (Bode, root-locus, or frequency response)
 - [ ] Test with default setpoints (40, 60, 70, 80)
-- [ ] Test with alternative setpoints
-- [ ] Analyze settling times and score
-- [ ] Document your design process
+- [ ] Test with alternative setpoints to verify robustness
+- [ ] Verify final score and settling times
+- [ ] Prepare 5-minute pitch explaining design approach
+- [ ] Submit:
+  - [ ] `controller.py` (working code)
+  - [ ] Design report (2 pages A4, PDF or DOC)
+  - [ ] Any supporting analysis files (MATLAB scripts, plots, etc.)
+
+**At Demonstration (5 minutes):**
+1. Pitch your design (design methodology, key trade-offs) — 1-2 min
+2. Run simulation and show results — 1-2 min
+3. Answer evaluator questions — 1-2 min
+4. Real-time score calculation for final evaluation
 
 ## References
 
