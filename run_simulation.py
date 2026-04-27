@@ -148,8 +148,11 @@ def main():
 
         # NEW SCORING FORMULA: Sum individual tank scores
         # Each tank that settles contributes (300 - t_settle) to total score
+        # Penalty: -50 points for each tank that overflows (only first overflow counts)
         final_score = 0.0
         individual_scores = {}
+        overflow_penalty = 0.0
+        overflowed_tanks = set()
         
         print("-" * 60)
         print("Individual Tank Scores:")
@@ -162,6 +165,15 @@ def main():
 
             target = setpoints[tank_id]
             tolerance = target * 0.05  # ±5% of its setpoint
+            
+            # Check for overflow (height > 100 cm)
+            overflow_indices = np.where(h_data > 100.0)[0]
+            if len(overflow_indices) > 0:
+                overflowed_tanks.add(tank_id)
+                overflow_penalty += 50.0
+                first_overflow_time = float(time_data[overflow_indices[0]])
+                print(f"Tank {tank_id}: ⚠️  OVERFLOW DETECTED at {first_overflow_time:.1f}s (max height: {np.max(h_data):.1f} cm) → Penalty: -50 points")
+            
             last_n = int(sustain_window / 0.1)
             recent = h_data[-last_n:]
             stayed_in_band = bool(np.all(np.abs(recent - target) <= tolerance))
@@ -178,10 +190,20 @@ def main():
                 print(f"Tank {tank_id}: Did not settle → Score = 0")
 
         print("-" * 60)
-        print(f"FINAL SCORE = Sum of all tank contributions = {final_score:.1f}")
+        print(f"Base Score (from settling): {final_score:.1f}")
+        
+        # Apply overflow penalty
+        if len(overflowed_tanks) > 0:
+            print(f"Overflow Penalty: {len(overflowed_tanks)} tank(s) × -50 = -{overflow_penalty:.1f}")
+            final_score -= overflow_penalty
+            print(f"FINAL SCORE = {final_score:.1f} (after overflow penalty)")
+        else:
+            print("Overflow Penalty: None")
+            print(f"FINAL SCORE = {final_score:.1f}")
+        
         print("=" * 60 + "\n")
-        print("Scoring formula: Score = Σ(300 - T_settle_i) for all tanks that settle")
-        print("Max possible score = 1200  (all 4 tanks settled at t=0)")
+        print("Scoring formula: Score = Σ(300 - T_settle_i) for settled tanks - (50 × # overflowed tanks)")
+        print("Max possible score = 1200  (all 4 tanks settled at t=0, no overflows)")
         
     except Exception as e:
         import traceback

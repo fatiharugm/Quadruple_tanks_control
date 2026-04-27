@@ -269,7 +269,7 @@ setpoint1, setpoint2, setpoint3, setpoint4 = 40.0, 60.0, 70.0, 80.0  # Modify th
 
 ## Scoring System
 
-The control performance is evaluated using a **cumulative per-tank scoring methodology**:
+The control performance is evaluated using a **cumulative per-tank scoring methodology with overflow penalty**:
 
 ### Scoring Rules
 
@@ -283,20 +283,27 @@ The control performance is evaluated using a **cumulative per-tank scoring metho
    ```
    where `t_settle` is the time at which the tank first enters its tolerance band
 
-3. **Total Score:**
+3. **Overflow Penalty:**
    ```
-   Final Score = Σ(Individual Tank Scores)
+   Penalty = 50 points per tank (applied only once, on first overflow)
    ```
-   Maximum possible: 1200 (all 4 tanks settled at t=0)
+   If any tank exceeds 100 cm (maximum height), a 50-point penalty is deducted.
+   Only the FIRST overflow per tank counts for penalty.
+
+4. **Total Score:**
+   ```
+   Final Score = Σ(Individual Tank Scores) - (50 × # overflowed tanks)
+   ```
+   Maximum possible: 1200 (all 4 tanks settled at t=0, no overflows)
 
 ### Example
 If:
 - Tank 1 settles at 16.7 seconds → Score = 300 - 16.7 = 283.3
 - Tank 2 settles at 30.4 seconds → Score = 300 - 30.4 = 269.6
-- Tank 3 does not settle → Score = 0
-- Tank 4 does not settle → Score = 0
+- Tank 3 overflows once → Penalty = -50.0 (even if it also doesn't settle)
+- Tank 4 does not settle and no overflow → Score = 0
 
-**Total Score = 283.3 + 269.6 = 552.9 / 1200**
+**Total Score = 283.3 + 269.6 + 0 - 50.0 = 502.9 / 1200**
 
 ## Important Files to Modify
 
