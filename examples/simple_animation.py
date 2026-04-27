@@ -28,7 +28,8 @@ def demo():
     # Step 2: Create controllers
     print("\n[STEP 2] Configuring PID Controllers")
     print("-" * 68)
-    gains = PIDGains(Kp=2.0, Ki=0.1, Kd=0.05)
+    # TODO: Tune these gains to achieve desired performance
+    gains = PIDGains(Kp=0.0, Ki=0.0, Kd=0.0)
     controller1 = PIDController(gains=gains)
     controller2 = PIDController(gains=gains)
     print(f"✓ Controllers configured")

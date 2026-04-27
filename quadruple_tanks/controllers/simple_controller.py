@@ -14,7 +14,7 @@ class SimpleLevelController:
     flow = base_flow + gain * (setpoint - measurement)
     """
     
-    def __init__(self, gain: float = 1.0, base_flow: float = 0.0, 
+    def __init__(self, gain: float = 0.0, base_flow: float = 0.0, 
                  output_limits: tuple = (0, 100)):
         """
         Initialize simple level controller.

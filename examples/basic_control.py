@@ -21,8 +21,9 @@ def main():
     print("\n✓ System created")
     
     # Create PID controllers for both pumps
-    gains1 = PIDGains(Kp=2.0, Ki=0.1, Kd=0.05)
-    gains2 = PIDGains(Kp=2.0, Ki=0.1, Kd=0.05)
+    # TODO: Tune these gains to achieve desired performance
+    gains1 = PIDGains(Kp=0.0, Ki=0.0, Kd=0.0)
+    gains2 = PIDGains(Kp=0.0, Ki=0.0, Kd=0.0)
     
     controller1 = PIDController(gains=gains1)
     controller2 = PIDController(gains=gains2)

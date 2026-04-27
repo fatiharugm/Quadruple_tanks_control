@@ -6,7 +6,8 @@ from quadruple_tanks.animation import TankAnimator
 def main():
     print("Setting up system...")
     system = QuadrupleTanksSystem()
-    gains = PIDGains(Kp=2.0, Ki=0.1, Kd=0.05)
+    # TODO: Tune these gains to achieve desired performance
+    gains = PIDGains(Kp=0.0, Ki=0.0, Kd=0.0)
     controller1 = PIDController(gains=gains)
     controller2 = PIDController(gains=gains)
     
