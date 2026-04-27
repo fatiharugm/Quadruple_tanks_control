@@ -492,4 +492,5 @@ Good luck! 🎓
 **Project Version:** 2.0 (Pump-Based Control)  
 **Last Updated:** April 2026  
 **Author:** Adha Imam Cahyadi, Dr.Eng  
-**Department:** Dynamic Control Systems, Universitas Gadjah Mada
+**Position:** Assoc. Professor in Dynamic Control Engineering  
+**Department:** Department of Electrical and Information Engineering, Universitas Gadjah Mada
