@@ -69,12 +69,6 @@ The pump-based architecture simplifies control by:
 │       ├── helpers.py
 │       └── __init__.py
 │
-├── examples/                              # Example scripts (reference only)
-│   ├── basic_control.py
-│   ├── detailed_visualization.py
-│   ├── gain_tuning.py
-│   └── ...
-│
 └── tests/                                 # Testing scripts
     └── test_quadruple_tanks.py
 ```
@@ -309,35 +303,78 @@ If:
 
 ### `controller.py` ⭐ (Primary - Your Work)
 
-This is where you implement your PID controller:
+This is where you implement your multi-input controller with 4 independent gain sets:
 
 ```python
-class PumpController:
-    def __init__(self, max_pump_flow=300.0):
-        """Initialize your controller parameters."""
-        self.Kp = 1.5        # Proportional gain - TUNE THIS
-        self.Ki = 0.15       # Integral gain - TUNE THIS
-        self.Kd = 0.5        # Derivative gain - TUNE THIS
-        self.bias = 250.0    # Bias flow for equilibrium - TUNE THIS
-        # ... other initialization ...
+class MultiplexController:
+    """Multi-input PID controller for quadruple tanks system."""
     
-    def update(self, setpoint, measurement, time):
+    def __init__(self):
+        # ============================================================
+        # PUMP 1 (u1) - Controls Tank 1
+        # ============================================================
+        self.u1_gains = ControlGains(
+            Kp=0.0,      # TODO: Tune pump 1 proportional gain
+            Ki=0.0,      # TODO: Tune pump 1 integral gain
+            Kd=0.0,      # TODO: Tune pump 1 derivative gain
+            bias=0.0     # TODO: Set pump 1 equilibrium bias (cm³/s)
+        )
+        
+        # ============================================================
+        # PUMP 2 (u2) - Controls Tank 2
+        # ============================================================
+        self.u2_gains = ControlGains(
+            Kp=0.0,      # TODO: Tune pump 2 proportional gain
+            Ki=0.0,      # TODO: Tune pump 2 integral gain
+            Kd=0.0,      # TODO: Tune pump 2 derivative gain
+            bias=0.0     # TODO: Set pump 2 equilibrium bias (cm³/s)
+        )
+        
+        # ============================================================
+        # VALVE 3 (u3) - Drain valve for Tank 3
+        # ============================================================
+        self.u3_gains = ControlGains(
+            Kp=0.0,      # TODO: Tune valve 3 proportional gain
+            Ki=0.0,      # TODO: Tune valve 3 integral gain
+            Kd=0.0,      # TODO: Tune valve 3 derivative gain
+            bias=0.0     # TODO: Set valve 3 equilibrium bias (0-1)
+        )
+        
+        # ============================================================
+        # VALVE 4 (u4) - Drain valve for Tank 4
+        # ============================================================
+        self.u4_gains = ControlGains(
+            Kp=0.0,      # TODO: Tune valve 4 proportional gain
+            Ki=0.0,      # TODO: Tune valve 4 integral gain
+            Kd=0.0,      # TODO: Tune valve 4 derivative gain
+            bias=0.0     # TODO: Set valve 4 equilibrium bias (0-1)
+        )
+    
+    def update(self, setpoint1, measurement1, setpoint2, measurement2,
+               setpoint3, measurement3, setpoint4, measurement4, time):
         """
-        Compute pump flow command.
+        Update all 4 controllers simultaneously.
         
         Args:
-            setpoint: Target tank height (cm)
-            measurement: Current tank height (cm)
+            setpoint1-4: Target tank heights (cm)
+            measurement1-4: Current tank heights (cm)
             time: Elapsed simulation time (s)
         
         Returns:
-            Pump flow command (0 to 300 cm³/s)
+            (u1, u2, u3, u4) - Control outputs for pumps 1,2 and valves 3,4
         """
         # YOUR CONTROL LAW HERE
-        error = setpoint - measurement
-        # ... PID computation ...
-        return pump_flow
+        # ... PID computation for all 4 channels ...
+        return u1, u2, u3, u4
 ```
+
+**Control Inputs:**
+- **u1** (Pump 1): Controls Tank 1 height | Range: [0, 300] cm³/s
+- **u2** (Pump 2): Controls Tank 2 height | Range: [0, 300] cm³/s
+- **u3** (Valve 3): Drain valve for Tank 3 | Range: [0, 1.0] normalized
+- **u4** (Valve 4): Drain valve for Tank 4 | Range: [0, 1.0] normalized
+
+Each control input has its own set of gains (Kp, Ki, Kd, bias) that you must tune.
 
 ### `run_simulation.py` (Secondary - Adjust for Testing)
 

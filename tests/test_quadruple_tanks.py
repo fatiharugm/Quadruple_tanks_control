@@ -3,7 +3,6 @@
 import pytest
 import numpy as np
 from quadruple_tanks.models import Tank, QuadrupleTanksSystem, TankConfig
-from quadruple_tanks.controllers import PIDController, PIDGains, SimpleLevelController
 from quadruple_tanks.simulation import Simulator
 
 

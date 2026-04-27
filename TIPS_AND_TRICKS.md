@@ -22,18 +22,18 @@ pytest tests/
 
 ## Common Usage Patterns
 
-### Pattern 1: Simple Control Run
+### Pattern 1: Using Your Controller
 ```python
-from quadruple_tanks import QuadrupleTanksSystem, PIDController, Simulator, PIDGains
+from quadruple_tanks import QuadrupleTanksSystem, Simulator
+from controller import MultiplexController
 
 # Create components
 system = QuadrupleTanksSystem()
-controller = PIDController(gains=PIDGains(Kp=2.0, Ki=0.1, Kd=0.05))
-sim = Simulator(system=system, controller1=controller)
+controller = MultiplexController()
+sim = Simulator(system=system, controller_pump1=controller, controller_pump2=controller)
 
 # Run and export
 time_data, state = sim.run(duration=50, setpoint1=10.0)
-sim.export_data("results.csv")
 ```
 
 ### Pattern 2: Multi-Setpoint Control
@@ -45,23 +45,39 @@ for setpoint in [5.0, 10.0, 15.0]:
         sim.step()
 ```
 
-### Pattern 3: Performance Comparison
+### Pattern 3: Tuning Multiple Gain Sets
 ```python
-from quadruple_tanks.utils import calculate_metrics
+from controller import MultiplexController
 
-gains_list = [
-    PIDGains(Kp=1.0, Ki=0.05, Kd=0.02),
-    PIDGains(Kp=2.0, Ki=0.1, Kd=0.05),
-    PIDGains(Kp=3.0, Ki=0.2, Kd=0.1),
-]
+# Create controller with initial gains
+controller = MultiplexController()
 
-for gains in gains_list:
-    controller = PIDController(gains=gains)
-    sim = Simulator(system=QuadrupleTanksSystem(), controller1=controller)
-    time_data, state = sim.run(duration=50, setpoint1=10.0)
-    
-    metrics = calculate_metrics(time_data, state["heights"][1], 10.0)
-    print(f"Kp={gains.Kp}: Overshoot={metrics['overshoot_percent']:.1f}%")
+# Tune individual control channels
+controller.u1_gains.Kp = 1.5  # Pump 1 proportional gain
+controller.u1_gains.Ki = 0.1  # Pump 1 integral gain
+controller.u1_gains.Kd = 0.5  # Pump 1 derivative gain
+controller.u1_gains.bias = 200.0  # Pump 1 equilibrium bias
+
+controller.u2_gains.Kp = 1.5  # Pump 2 proportional gain
+controller.u2_gains.Ki = 0.1
+controller.u2_gains.Kd = 0.5
+controller.u2_gains.bias = 200.0
+
+controller.u3_gains.Kp = 0.01  # Valve 3 proportional gain
+controller.u3_gains.Ki = 0.0003
+controller.u3_gains.Kd = 0.002
+controller.u3_gains.bias = 0.5  # Valve 3 equilibrium bias
+
+controller.u4_gains.Kp = 0.01  # Valve 4 proportional gain
+controller.u4_gains.Ki = 0.0003
+controller.u4_gains.Kd = 0.002
+controller.u4_gains.bias = 0.5
+
+# Use the tuned controller
+sim = Simulator(system=QuadrupleTanksSystem(), 
+               controller_pump1=controller,
+               controller_pump2=controller)
+time_data, state = sim.run(duration=300, setpoint1=40.0)
 ```
 
 ## PID Tuning Tips
@@ -171,20 +187,45 @@ for i in range(1000):
 
 ### Batch Simulations
 ```python
-# Compare multiple scenarios
+# Compare multiple gain scenarios
+from controller import MultiplexController
+
 scenarios = [
-    {"name": "Low gain", "Kp": 1.0},
-    {"name": "High gain", "Kp": 3.0},
+    {"name": "Low gain", "Kp": 0.5, "Ki": 0.05, "Kd": 0.2},
+    {"name": "Medium gain", "Kp": 1.5, "Ki": 0.1, "Kd": 0.5},
+    {"name": "High gain", "Kp": 2.5, "Ki": 0.15, "Kd": 0.8},
 ]
 
 for scenario in scenarios:
-    controller = PIDController(
-        gains=PIDGains(Kp=scenario['Kp'], Ki=0.1, Kd=0.05)
-    )
+    controller = MultiplexController()
+    
+    # Set pump gains
+    controller.u1_gains.Kp = scenario['Kp']
+    controller.u1_gains.Ki = scenario['Ki']
+    controller.u1_gains.Kd = scenario['Kd']
+    controller.u1_gains.bias = 200.0
+    
+    controller.u2_gains.Kp = scenario['Kp']
+    controller.u2_gains.Ki = scenario['Ki']
+    controller.u2_gains.Kd = scenario['Kd']
+    controller.u2_gains.bias = 200.0
+    
+    # Set valve gains
+    controller.u3_gains.Kp = 0.01
+    controller.u3_gains.Ki = 0.0003
+    controller.u3_gains.Kd = 0.002
+    controller.u3_gains.bias = 0.5
+    
+    controller.u4_gains.Kp = 0.01
+    controller.u4_gains.Ki = 0.0003
+    controller.u4_gains.Kd = 0.002
+    controller.u4_gains.bias = 0.5
+    
     sim = Simulator(system=QuadrupleTanksSystem(), 
-                   controller1=controller)
-    time_data, state = sim.run(duration=50, setpoint1=10.0)
-    sim.export_data(f"results_{scenario['name']}.csv")
+                   controller_pump1=controller,
+                   controller_pump2=controller)
+    time_data, state = sim.run(duration=300, setpoint1=40.0)
+    print(f"Scenario '{scenario['name']}' completed")
 ```
 
 ## Troubleshooting
