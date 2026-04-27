@@ -52,14 +52,13 @@ control Project 1/
 - State tracking and history
 - Physical constraints
 
-### 3. **Controllers** (`controllers/`)
-- **PIDController**: Full PID control with configurable gains
-  - Proportional, integral, derivative terms
-  - Output limiting
-  - State management
-- **SimpleLevelController**: Basic proportional controller
-  - Easy to understand and use
-  - Suitable for educational purposes
+### 3. **Controllers** (`controller.py`)
+- **MultiplexController**: Multi-input PID controller with 4 independent gain sets
+  - u1: Pump 1 controller (0-300 cm³/s)
+  - u2: Pump 2 controller (0-300 cm³/s)
+  - u3: Valve 3 controller (0-1.0 normalized)
+  - u4: Valve 4 controller (0-1.0 normalized)
+  - Each channel has individual Kp, Ki, Kd, and bias tuning parameters
 
 ### 4. **Simulator** (`simulation/simulator.py`)
 - Integrates plant model with controllers
@@ -130,32 +129,39 @@ pytest tests/ -v
 
 ## 📝 Usage Examples
 
-### Basic Control
+### Basic Control with Student Controller
 ```python
-from quadruple_tanks import (
-    QuadrupleTanksSystem,
-    PIDController,
-    PIDGains,
-    Simulator,
-)
+from quadruple_tanks import QuadrupleTanksSystem, Simulator
+from quadruple_tanks.animation import animate_simulation
+from controller import MultiplexController
 
-# Create system and controllers
+# Create system and controller
 system = QuadrupleTanksSystem()
-gains = PIDGains(Kp=2.0, Ki=0.1, Kd=0.05)
-controller = PIDController(gains=gains)
+controller = MultiplexController()
 
-# Run simulation
-sim = Simulator(system=system, controller1=controller, dt=0.1)
-time_data, state_data = sim.run(duration=100, setpoint1=10.0)
+# Tune your controller gains (modify these!)
+controller.u1_gains.Kp = 1.5
+controller.u1_gains.Ki = 0.1
+controller.u1_gains.Kd = 0.5
+controller.u1_gains.bias = 200.0
+
+controller.u2_gains.Kp = 1.5
+controller.u2_gains.Ki = 0.1
+controller.u2_gains.Kd = 0.5
+controller.u2_gains.bias = 200.0
+
+# Run simulation with visualization
+sim = Simulator(system=system, controller_pump1=controller, controller_pump2=controller, dt=0.1)
+animator = animate_simulation(sim, duration=300, setpoint1=40.0, setpoint2=60.0)
 ```
 
 ### Data Analysis
 ```python
 from quadruple_tanks.utils import analyze_response, plot_results
 
-# Analyze response
-analysis = analyze_response(time_data, state_data["heights"][1], 10.0)
-print(analysis)
+# Get simulation results from animator
+time_data = animator.time_data
+state_data = animator.heights_data
 
 # Plot results
 plot_results(time_data, state_data["heights"], 

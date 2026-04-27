@@ -47,9 +47,9 @@ class MultiplexController:
         # PUMP 1 (u1) - Controls Tank 1
         # ============================================================
         self.u1_gains = ControlGains(
-            Kp=10.0,      # TODO: Tune pump 1 proportional gain
-            Ki=0.1,      # TODO: Tune pump 1 integral gain
-            Kd=5.0,      # TODO: Tune pump 1 derivative gain
+            Kp=0.0,      # TODO: Tune pump 1 proportional gain
+            Ki=0.0,      # TODO: Tune pump 1 integral gain
+            Kd=0.0,      # TODO: Tune pump 1 derivative gain
             bias=0.0     # TODO: Set pump 1 equilibrium bias (cm³/s)
         )
         self.u1_max_flow = 300.0  # cm³/s
@@ -63,8 +63,8 @@ class MultiplexController:
         # ============================================================
         self.u2_gains = ControlGains(
             Kp=0.0,      # TODO: Tune pump 2 proportional gain
-            Ki=0.1,      # TODO: Tune pump 2 integral gain
-            Kd=3.0,      # TODO: Tune pump 2 derivative gain
+            Ki=0.0,      # TODO: Tune pump 2 integral gain
+            Kd=0.0,      # TODO: Tune pump 2 derivative gain
             bias=0.0     # TODO: Set pump 2 equilibrium bias (cm³/s)
         )
         self.u2_max_flow = 300.0  # cm³/s
@@ -77,9 +77,9 @@ class MultiplexController:
         # VALVE 3 (u3) - Drain valve for Tank 3
         # ============================================================
         self.u3_gains = ControlGains(
-            Kp=10.0,      # TODO: Tune valve 3 proportional gain
+            Kp=0.0,      # TODO: Tune valve 3 proportional gain
             Ki=0.0,      # TODO: Tune valve 3 integral gain
-            Kd=5.0,      # TODO: Tune valve 3 derivative gain
+            Kd=0.0,      # TODO: Tune valve 3 derivative gain
             bias=0.0     # TODO: Set valve 3 equilibrium bias (0-1)
         )
         self.u3_integral_error = 0.0
@@ -91,9 +91,9 @@ class MultiplexController:
         # VALVE 4 (u4) - Drain valve for Tank 4
         # ============================================================
         self.u4_gains = ControlGains(
-            Kp=8.0,      # TODO: Tune valve 4 proportional gain
-            Ki=0.1,      # TODO: Tune valve 4 integral gain
-            Kd=10.0,      # TODO: Tune valve 4 derivative gain
+            Kp=0.0,      # TODO: Tune valve 4 proportional gain
+            Ki=0.0,      # TODO: Tune valve 4 integral gain
+            Kd=0.0,      # TODO: Tune valve 4 derivative gain
             bias=0.0     # TODO: Set valve 4 equilibrium bias (0-1)
         )
         self.u4_integral_error = 0.0

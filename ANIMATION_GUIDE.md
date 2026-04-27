@@ -32,19 +32,23 @@ The animation module provides real-time visualization of the quadruple tanks sys
 ```python
 from quadruple_tanks import (
     QuadrupleTanksSystem,
-    PIDController,
-    PIDGains,
     Simulator,
 )
 from quadruple_tanks.animation import animate_simulation
+from controller import MultiplexController
 
 # Setup system and controllers
 system = QuadrupleTanksSystem()
-gains = PIDGains(Kp=2.0, Ki=0.1, Kd=0.05)
-controller = PIDController(gains=gains)
+controller = MultiplexController()
+
+# Tune your controller gains
+controller.u1_gains.Kp = 2.0
+controller.u1_gains.Ki = 0.1
+controller.u1_gains.Kd = 0.05
+controller.u1_gains.bias = 200.0
 
 # Create simulator
-sim = Simulator(system=system, controller1=controller, dt=0.1)
+sim = Simulator(system=system, controller_pump1=controller, controller_pump2=controller, dt=0.1)
 
 # Run animated simulation
 animator = animate_simulation(
@@ -272,11 +276,25 @@ Shows historical behavior:
 ### Custom Controller Tuning with Animation
 
 ```python
-# Compare different PID gains visually
+from controller import MultiplexController
+
+# Compare different gains visually
 for Kp in [1.0, 2.0, 3.0]:
+    controller = MultiplexController()
+    controller.u1_gains.Kp = Kp
+    controller.u1_gains.Ki = 0.1
+    controller.u1_gains.Kd = 0.05
+    controller.u1_gains.bias = 200.0
+    
+    controller.u2_gains.Kp = Kp
+    controller.u2_gains.Ki = 0.1
+    controller.u2_gains.Kd = 0.05
+    controller.u2_gains.bias = 200.0
+    
     sim = Simulator(system=QuadrupleTanksSystem(),
-                   controller1=PIDController(gains=PIDGains(Kp=Kp, Ki=0.1, Kd=0.05)))
-    animate_simulation(sim, duration=60, setpoint1=12.0, show_plot=True)
+                   controller_pump1=controller,
+                   controller_pump2=controller)
+    animate_simulation(sim, duration=300, setpoint1=40.0, show_plot=True)
 ```
 
 ### Monitoring Specific Events

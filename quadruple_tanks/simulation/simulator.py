@@ -72,20 +72,30 @@ class Simulator:
         self.setpoint4 = sp4  # PASSIVE: lower tank 4, follows coupling
     
     def step(self) -> Dict:
-        """Execute one simulation step using PUMP-BASED control."""
+        """Execute one simulation step using MULTI-INPUT control."""
         pump1_flow = 250.0
         pump2_flow = 250.0
+        valve3_opening = 0.5
+        valve4_opening = 0.5
         
-        # PUMP CONTROL: Controllers regulate upper tank heights (T1, T2)
+        # Get current tank heights
+        heights = self.system.get_heights()
+        
+        # MULTI-INPUT CONTROL: Controller handles all 4 inputs (u1, u2, u3, u4)
         if self.controller_pump1 is not None:
-            pump1_flow = self.controller_pump1.update(self.setpoint1, self.system.get_height(1), self.current_time)
-        if self.controller_pump2 is not None:
-            pump2_flow = self.controller_pump2.update(self.setpoint2, self.system.get_height(2), self.current_time)
+            # Call the MultiplexController with all 4 setpoints and measurements
+            pump1_flow, pump2_flow, valve3_opening, valve4_opening = self.controller_pump1.update(
+                self.setpoint1, heights[1],  # Tank 1
+                self.setpoint2, heights[2],  # Tank 2
+                self.setpoint3, heights[3],  # Tank 3
+                self.setpoint4, heights[4],  # Tank 4
+                self.current_time
+            )
         
-        # Apply pump commands to system
+        # Apply control commands to system
         self.system.set_pump_flows(pump1_flow, pump2_flow)
         
-        # Update system state (lower tanks regulate themselves via fixed drain valves)
+        # Update system state
         self.system.update(self.dt)
         
         # Record data

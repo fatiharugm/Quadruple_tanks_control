@@ -23,9 +23,9 @@ from quadruple_tanks.animation import animate_simulation
 
 # Import the student's controller
 try:
-    from controller import PumpController
+    from controller import MultiplexController
 except ImportError:
-    print("Error: Could not find 'PumpController' in controller.py. Please make sure it exists.")
+    print("Error: Could not find 'MultiplexController' in controller.py. Please make sure it exists.")
     sys.exit(1)
 
 
@@ -39,16 +39,15 @@ def main():
     system = QuadrupleTanksSystem()
     
     # 2. Setup the Controllers (from controller.py)
-    print("[2/3] Loading your pump-based controllers...")
-    controller_pump1 = PumpController(max_pump_flow=300.0)  # Pump 1: regulates Tank 1
-    controller_pump2 = PumpController(max_pump_flow=300.0)  # Pump 2: regulates Tank 2
+    print("[2/3] Loading your multi-input controller...")
+    controller = MultiplexController()  # Single MultiplexController handles all 4 inputs
     
     # 3. Create the Simulator to tie Plant and Controllers together
-    # NEW ARCHITECTURE: Pump-based control (simpler, more effective)
+    # NEW ARCHITECTURE: Multi-input control (4 independent control channels)
     sim = Simulator(
         system=system,
-        controller_pump1=controller_pump1,
-        controller_pump2=controller_pump2,
+        controller_pump1=controller,
+        controller_pump2=controller,
         dt=0.1
     )
     
