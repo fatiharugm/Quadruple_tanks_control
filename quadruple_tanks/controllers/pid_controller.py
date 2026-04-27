@@ -8,9 +8,9 @@ from dataclasses import dataclass
 class PIDGains:
     """PID controller gains."""
     
-    Kp: float = 0.0  # Proportional gain
-    Ki: float = 0.0  # Integral gain
-    Kd: float = 0.0  # Derivative gain
+    Kp: float = 10.0  # Proportional gain
+    Ki: float = 0.1  # Integral gain
+    Kd: float = 5.0  # Derivative gain
 
 
 class PIDController:
