@@ -1,4 +1,3 @@
-"""Requirements file for quadruple tanks control system."""
 
 numpy>=1.20.0
 matplotlib>=3.4.0
